@@ -7,6 +7,12 @@
 #   require 'bio/bio-plugin/plugin'
 #
 # In this file only require other files. Avoid other source code.
+require 'active_record'
 
-require 'bio-img_database/img_database.rb'
+require 'bio-logger'
+Bio::Log::LoggerPlus.new('bio-img_database')
+
+require 'bio/img_database/connect'
+require 'bio/img_database/tables'
+
 
