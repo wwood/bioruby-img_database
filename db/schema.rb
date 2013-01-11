@@ -14,13 +14,22 @@
 ActiveRecord::Schema.define(:version => 20130107052623) do
 
   create_table "cogs", :force => true do |t|
-    t.string   "name"
-    t.string   "description"
-    t.datetime "created_at",  :null => false
-    t.datetime "updated_at",  :null => false
+    t.integer "gene_oid"
+    t.integer "gene_length"
+    t.decimal "percent_identity"
+    t.integer "query_start"
+    t.integer "query_end"
+    t.integer "subj_start"
+    t.integer "subj_end"
+    t.float   "evalue"
+    t.decimal "bit_score"
+    t.string  "cog_id"
+    t.string  "cog_name"
+    t.integer "cog_length"
   end
 
-  add_index "cogs", ["name"], :name => "index_cogs_on_name", :unique => true
+  add_index "cogs", ["cog_id"], :name => "index_cogs_on_cog_id"
+  add_index "cogs", ["gene_oid"], :name => "index_cogs_on_gene_oid"
 
   create_table "genes", :force => true do |t|
     t.integer "img_id"
