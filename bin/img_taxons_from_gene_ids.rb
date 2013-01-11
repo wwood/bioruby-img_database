@@ -109,8 +109,19 @@ if __FILE__ == $0 #needs to be removed if this script is distributed as part of 
   end
   #$stderr.puts krona_taxons.inspect
   progress.finish
-  File.open(options[:krona_output_file],'w') do |out|
-    out.puts Bio::Krona.html(krona_taxons)
+  
+  num_assigned = krona_taxons.values.reduce(:+)
+  
+  if num_assigned > 0
+    log.info "Using #{num_assigned} genes assigned taxonomy to put in the krona"
+
+    File.open(options[:krona_output_file],'w') do |out|
+      out.puts Bio::Krona.html(krona_taxons)
+    end
+    log.info "Successfully wrote HTML to #{options[:krona_output_file]}"
+  
+  else
+    log.error "No genes were assigned taxonomy, so no krona image is generated"
   end
-  log.info "Successfully wrote HTML to #{options[:krona_output_file]}"
+
 end #end if running as a script
