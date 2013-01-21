@@ -8,6 +8,7 @@ require 'progressbar'
 
 if __FILE__ == $0 #needs to be removed if this script is distributed as part of a rubygem
   SCRIPT_NAME = File.basename(__FILE__); LOG_NAME = SCRIPT_NAME.gsub('.rb','')
+  possible_upload_types = %w(cog pfam tigrfam ko)
   
   # Parse command line options into the options hash
   options = {
@@ -15,7 +16,7 @@ if __FILE__ == $0 #needs to be removed if this script is distributed as part of 
   }
   o = OptionParser.new do |opts|
     opts.banner = "
-      Usage: #{SCRIPT_NAME} {cog} --img-database <some.sqlite3> --img-directory <img_flatfiles_basedir>
+      Usage: #{SCRIPT_NAME} {#{possible_upload_types.join(',')}} --img-database <some.sqlite3> --img-directory <img_flatfiles_basedir>
       
       Upload a table of data to a local sqlite3 database. \n\n"
       
@@ -33,36 +34,43 @@ if __FILE__ == $0 #needs to be removed if this script is distributed as part of 
     opts.on("--logger filename",String,"Log to file [default #{options[:logger]}]") { |name| options[:logger] = name}
     opts.on("--trace options",String,"Set log level [default INFO]. e.g. '--trace debug' to set logging level to DEBUG"){|s| Bio::Log::CLI.trace(s)}
   end; o.parse!
-  if ARGV.length != 1
+  if ARGV.length != 1 or options[:database_file].nil? or options[:img_directory].nil?
     $stderr.puts o
     exit 1
   end
   # Setup logging. bio-logger defaults to STDERR not STDOUT, I disagree
   Bio::Log::CLI.logger(options[:logger]); log = Bio::Log::LoggerPlus.new(LOG_NAME); Bio::Log::CLI.configure(LOG_NAME)
   
-  
-  
-  data_file_path = lambda {|taxon_id| File.join(taxon_id, "#{taxon_id}.cog.tab.txt")}
-  table_name = 'cogs'
+  upload_type = ARGV[0]
+  unless possible_upload_types.include?(upload_type)
+    $stderr.puts "Unexpected upload type specified: #{upload_type}"
+    exit 1
+  end
+  data_file_path = lambda {|taxon_id| File.join(taxon_id, "#{taxon_id}.#{upload_type}.tab.txt")}
+  table_name = "#{upload_type}s"
   
   Dir.chdir(options[:img_directory])
   img_directories = Dir.glob('*')
   log.info "Found #{img_directories.length} directories that look like they contain IMG data"
   progress = ProgressBar.new('img', img_directories.length)
 
+  num_empty_folders = 0
+  num_ok_folders = 0
+
   Tempfile.open('img_upload') do |csv_tempfile|
+    `ln #{csv_tempfile.path} /tmp/erd`
     csv_tempfile.close
     
     primary_key = 1
     img_directories.each do |taxon_directory|
       if !taxon_directory.match(/^\d+$/) or !File.directory?(taxon_directory)
-        log.warn "Skipping file/directory #{taxon_directory} as it doesn't seem like a sub-directory with genome data in it"
         next
       end
       
       data_path = data_file_path.call taxon_directory
       if !File.exist?(data_path)
-        log.warn "Data file not found so skipping this sub-directory: #{data_path}"
+        log.debug "Data file not found so skipping this sub-directory: #{data_path}"
+        num_empty_folders += 1
         next
       end
       
@@ -79,10 +87,13 @@ if __FILE__ == $0 #needs to be removed if this script is distributed as part of 
       end
       
       primary_key += num_lines
+      num_ok_folders += 1
 
-      #progress.inc
+      progress.inc
     end
     progress.finish
+
+    log.info "Found #{num_empty_folders} that contained no information, where #{num_ok_folders} did."
   
   
     log.info "Importing the temporary CSV file into the database"

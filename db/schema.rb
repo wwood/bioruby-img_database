@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130107052623) do
+ActiveRecord::Schema.define(:version => 20130114121805) do
 
   create_table "cogs", :force => true do |t|
     t.integer "gene_oid"
@@ -46,5 +46,58 @@ ActiveRecord::Schema.define(:version => 20130107052623) do
 
   add_index "genes_cogs", ["cog_id"], :name => "index_genes_cogs_on_cog_id"
   add_index "genes_cogs", ["gene_id"], :name => "index_genes_cogs_on_gene_id"
+
+  create_table "kos", :force => true do |t|
+    t.integer "gene_oid"
+    t.integer "gene_length"
+    t.decimal "percent_identity"
+    t.integer "query_start"
+    t.integer "query_end"
+    t.integer "subj_start"
+    t.integer "subj_end"
+    t.float   "evalue"
+    t.decimal "bit_score"
+    t.string  "ko_id"
+    t.string  "ko_name"
+    t.string  "ec"
+    t.string  "img_ko_flag"
+  end
+
+  add_index "kos", ["ec"], :name => "index_kos_on_ec"
+  add_index "kos", ["gene_oid"], :name => "index_kos_on_gene_oid"
+  add_index "kos", ["ko_id"], :name => "index_kos_on_ko_id"
+
+  create_table "pfams", :force => true do |t|
+    t.integer "gene_oid"
+    t.integer "gene_length"
+    t.decimal "percent_identity"
+    t.integer "query_start"
+    t.integer "query_end"
+    t.integer "subj_start"
+    t.integer "subj_end"
+    t.float   "evalue"
+    t.decimal "bit_score"
+    t.string  "pfam_id"
+    t.string  "pfam_name"
+    t.integer "pfam_length"
+  end
+
+  add_index "pfams", ["gene_oid"], :name => "index_pfams_on_gene_oid"
+  add_index "pfams", ["pfam_id"], :name => "index_pfams_on_pfam_id"
+
+  create_table "tigrfams", :force => true do |t|
+    t.integer "gene_oid"
+    t.integer "gene_length"
+    t.decimal "percent_identity"
+    t.integer "query_start"
+    t.integer "query_end"
+    t.float   "evalue"
+    t.decimal "bit_score"
+    t.string  "tigrfam_id"
+    t.string  "tigrfam_name"
+  end
+
+  add_index "tigrfams", ["gene_oid"], :name => "index_tigrfams_on_gene_oid"
+  add_index "tigrfams", ["tigrfam_id"], :name => "index_tigrfams_on_tigrfam_id"
 
 end

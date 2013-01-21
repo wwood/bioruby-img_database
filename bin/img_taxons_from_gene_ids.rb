@@ -2,15 +2,13 @@
 
 require 'optparse'
 require 'bio-logger'
-
-$:.push File.join(File.dirname(__FILE__),'..','..','bioruby-taxonomy_definition_files','lib')
-require 'bio-taxonomy_definition_files' #has IMG taxonomy parser file
+require 'bio-img_metadata'
+require 'bio-krona'
+require 'progressbar'
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'bio-img_database'
 
-require 'bio-krona'
-require 'progressbar'
 
 if __FILE__ == $0 #needs to be removed if this script is distributed as part of a rubygem
   SCRIPT_NAME = File.basename(__FILE__); LOG_NAME = 'bio-img_database'

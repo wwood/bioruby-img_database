@@ -1,7 +1,7 @@
 module Bio
   module IMG
     module Database
-      def self.connect(db_path=File.join(File.dirname(__FILE__),'..','..','..','db','img_database.sqlite3'))
+      def self.connect(db_path=File.join(File.dirname(__FILE__),'..','..','..','db','development.sqlite3'))
         Connection.connect db_path
       end
 
