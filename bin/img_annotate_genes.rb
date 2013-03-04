@@ -3,9 +3,8 @@
 require 'optparse'
 require 'bio-logger'
 require 'bio-img_metadata'
-
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'bio-img_database'
+
 include Bio::IMG::Database
 
 SCRIPT_NAME = File.basename(__FILE__); LOG_NAME = SCRIPT_NAME.gsub('.rb','')
@@ -19,9 +18,9 @@ options = {
 o = OptionParser.new do |opts|
   opts.banner = "
     Usage: #{SCRIPT_NAME} <arguments>
-    
+
     Annotate genes with data from a local IMG database\n\n"
-    
+
   opts.on("-m", "--img-metadata-file IMG_METADATA_FILENAME", "metadata file that includes the mapping from taxon identifier to taxonomic classifications [required]") do |arg|
     options[:img_metadata_file] =  arg
   end
@@ -64,7 +63,7 @@ log.info "Read in #{taxonomies.length} different taxonomy entries"
 ARGF.each_line do |line|
   gene_id = nil
   to_print = []
-  
+
   if options[:input_is_blastp]
     splits = line.split("\t")
     unless splits.length == 12
@@ -76,7 +75,7 @@ ARGF.each_line do |line|
     perc_id = splits[2]
     eval = splits[10]
     alignment_length = splits[3]
-    
+
     to_print.push query_id
     to_print.push perc_id
     to_print.push eval
@@ -84,30 +83,30 @@ ARGF.each_line do |line|
   else
     gene_id = line.strip
   end
-  
+
   to_print.push gene_id
-  
+
   cogs = Cog.where(:gene_oid => gene_id.to_i).all
   if cogs.length >= 1
     if cogs.length > 1
       # I don't think this should happe, but just to be paranoid
       log.warn "Found multiple COG annotations for gene ID #{gene_id}, only taking the first one"
     end
-      
+
     cog = cogs[0]
     to_print.push cog.cog_id
     to_print.push cog.cog_name
     to_print.push cog.evalue
-      
+
   elsif cogs.empty?
     3.times{to_print.push nil}
   end
-  
+
   # Annotate with the annotation from the fasta file
   gene = Gene.where(:img_id => gene_id).first
   if gene
     to_print.push gene.description
-    
+
     # Annotate with taxonomy
     taxon = taxonomy_hash[gene.taxon_id]
     if taxon.nil?
@@ -125,6 +124,6 @@ ARGF.each_line do |line|
   else
     raise
   end
-  
+
   puts to_print.join("\t")
 end
