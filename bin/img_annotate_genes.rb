@@ -3,6 +3,8 @@
 require 'optparse'
 require 'bio-logger'
 require 'bio-img_metadata'
+
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'bio-img_database'
 
 include Bio::IMG::Database
