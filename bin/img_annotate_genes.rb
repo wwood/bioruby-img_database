@@ -75,12 +75,12 @@ ARGF.each_line do |line|
     gene_id = splits[1]
     query_id = splits[0]
     perc_id = splits[2]
-    eval = splits[10]
+    evalue = splits[10]
     alignment_length = splits[3]
 
     to_print.push query_id
     to_print.push perc_id
-    to_print.push eval
+    to_print.push evalue
     to_print.push alignment_length
   else
     gene_id = line.strip
@@ -88,7 +88,7 @@ ARGF.each_line do |line|
 
   to_print.push gene_id
 
-  cogs = Cog.where(:gene_oid => gene_id.to_i).all
+  cogs = Cog.where(:gene_oid => gene_id.to_i)
   if cogs.length >= 1
     if cogs.length > 1
       # I don't think this should happe, but just to be paranoid
